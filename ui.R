@@ -15,7 +15,12 @@ shinyUI(navbarPage("PeakR",
       ),
       ## FILE INPUT BOX END ##
       
-      uiOutput("run") 
+      uiOutput("run"),
+      
+      uiOutput("hcut"),
+      
+      sliderInput("scut","Global min size",min=0,max=550,val=50)
+      
       
     ),
     mainPanel(

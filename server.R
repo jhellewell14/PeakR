@@ -34,11 +34,18 @@ shinyServer(function(input,output, session){
     ## RENDER TABLE BASED ON RUN SELECTION ##
     output$contents <- renderTable({
       dat <- filedata()
-      if(!is.null(dat)) dat$Dye.Sample.Peak <- substring(dat$Dye.Sample.Peak,1,1)
+      if(!is.null(dat)){
+        dat$Dye.Sample.Peak <- substring(dat$Dye.Sample.Peak,1,1)
+        dye.names <- unique(substring(dat$Dye.Sample.Peak,1,1))}
       dat <- dat[as.vector(dat$Sample.Name)==filename(),c("Size","Height","Dye.Sample.Peak")]
       dat <- dat[dat$Size>input$scut,]
-      if(!is.null(dat)) names(dat) <- c("Size","Height","Dye Colour")
-      dat[dat$Height>input$heightcut,]
+      dat <- dat[dat$Height>input$heightcut,]
+      if(!is.null(dat)){
+        names(dat) <- c("Size","Height","Dye.Colour")
+        dye.choices <- dye.names[as.numeric(input$dyechoice)]
+        dat <- dat[which(substring(dat$Dye.Colour,1,1) %in% dye.choices),]}
+      
+      dat
     })
     
     ## SET UP CUT OFF SLIDERS BASED ON RUN SELECTION ##
@@ -50,9 +57,19 @@ shinyServer(function(input,output, session){
     })
     
     ## SELECT DYES TO SHOW ##
+    output$dchoice <- renderUI({
+      dat <- filedata()
+      if(!is.null(dat)){ d.names <- unique(substring(dat$Dye.Sample.Peak,1,1))
+        d.choices <- c(1:length(d.names))
+        names(d.choices) <- d.names
+        checkboxGroupInput("dyechoice", label = h3("Dye colours"), 
+                           choices = d.choices,
+                           selected = c(1:length(d.names)))
+      }
+      
+    })
     
-    
-    
+  
     
   
 })

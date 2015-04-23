@@ -19,7 +19,9 @@ shinyUI(navbarPage("PeakR",
       
       uiOutput("hcut"),
       
-      sliderInput("scut","Global min size",min=0,max=550,val=50)
+      sliderInput("scut","Global min size",min=0,max=550,val=50),
+      
+      uiOutput("dchoice")
       
       
     ),

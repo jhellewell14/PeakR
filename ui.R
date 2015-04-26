@@ -26,14 +26,20 @@ shinyUI(navbarPage("PeakR",
       
     ),
     mainPanel(
+      plotOutput("ephgram"),
       tableOutput('contents')
     )
   )
-          ),
+          )
   
   
-  tabPanel("Settings"),
-  tabPanel("Electropherogram")
+  #tabPanel("Electropherogram",
+           
+    #       plotOutput("ephgram")
+         
+           
+          
+  #)
   
   
   

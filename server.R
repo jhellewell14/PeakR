@@ -31,6 +31,8 @@ shinyServer(function(input,output, session){
       run.names[as.numeric(input$run.names)]
     })
     
+    
+    
     ## RENDER TABLE BASED ON RUN SELECTION ##
     output$contents <- renderTable({
       dat <- filedata()
@@ -70,6 +72,44 @@ shinyServer(function(input,output, session){
     })
     
   
+   output$ephgram <- renderPlot({
+     dat <- filedata()
+     
+     if(!is.null(dat)){
+       dat$Dye.Sample.Peak <- substring(dat$Dye.Sample.Peak,1,1)
+       dye.names <- unique(substring(dat$Dye.Sample.Peak,1,1))
+     }
+     
+     dat <- dat[as.vector(dat$Sample.Name)==filename(),c("Size","Height","Dye.Sample.Peak")]
+     dat <- dat[dat$Size>input$scut,]
+     dat <- dat[dat$Height>input$heightcut,]
+     
+     if(!is.null(dat)){
+       names(dat) <- c("Size","Height","Dye.Colour")
+       dye.choices <- dye.names[as.numeric(input$dyechoice)]
+       dat <- dat[which(substring(dat$Dye.Colour,1,1) %in% dye.choices),]
+     
+     
+     
+     plot(1,type='n',xlim=c(0,550),ylim=c(0,max(dat$Height)))
+     
+     for(num in input$dyechoice){
+       points <- dat[which(substring(dat$Dye.Colour,1,1) == dye.names[as.numeric(num)]),]
+       vec <- rep(0,551)
+       vec[round(points$Size)] <- points$Height
+       line.col <- switch(dye.names[as.numeric(num)],
+              "R" = "Red",
+              "B" = "Blue",
+              "G" = "Green",
+              "Y" = "Yellow")
+       lines(c(0:550),vec,col=line.col)
+       #print(vec)
+       #print(num)
+       #print(line.col)
+       #print(dye.names[as.numeric(num)])
+     }
+     }
+   })
     
   
 })

@@ -82,6 +82,7 @@ shinyServer(function(input,output, session){
      
      dat <- dat[as.vector(dat$Sample.Name)==filename(),c("Size","Height","Dye.Sample.Peak")]
      dat <- dat[dat$Size>input$scut,]
+     dat <- dat[dat$Size<551,]
      dat <- dat[dat$Height>input$heightcut,]
      
      if(!is.null(dat)){

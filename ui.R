@@ -21,11 +21,14 @@ shinyUI(navbarPage("PeakR",
       
       sliderInput("scut","Global min size",min=0,max=550,val=50),
       
-      uiOutput("dchoice")
+      uiOutput("dchoice"),
+      
+      actionButton("fwrite",label="Commit")
       
       
     ),
     mainPanel(
+      textOutput("filewrite"),
       plotOutput("ephgram"),
       tableOutput('contents')
     )

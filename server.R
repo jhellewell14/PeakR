@@ -2,6 +2,7 @@ library(seqinr)
 dat <- NULL
 
 
+
 shinyServer(function(input,output, session){
     
     ## DEAL WITH .CSV FILE ##
@@ -24,6 +25,9 @@ shinyServer(function(input,output, session){
       selectInput("run.names","select run name",choices=run.select)
     })
     
+    
+    
+    ## REACTIVE WHICH RETURNS CURRENT FILE NAME ##
     filename <- reactive({
       dat <- filedata()
       if(is.null(dat)) return(NULL)
@@ -35,19 +39,7 @@ shinyServer(function(input,output, session){
     
     ## RENDER TABLE BASED ON RUN SELECTION ##
     output$contents <- renderTable({
-      dat <- filedata()
-      if(!is.null(dat)){
-        dat$Dye.Sample.Peak <- substring(dat$Dye.Sample.Peak,1,1)
-        dye.names <- unique(substring(dat$Dye.Sample.Peak,1,1))}
-      dat <- dat[as.vector(dat$Sample.Name)==filename(),c("Size","Height","Dye.Sample.Peak")]
-      dat <- dat[dat$Size>input$scut,]
-      dat <- dat[dat$Height>input$heightcut,]
-      if(!is.null(dat)){
-        names(dat) <- c("Size","Height","Dye.Colour")
-        dye.choices <- dye.names[as.numeric(input$dyechoice)]
-        dat <- dat[which(substring(dat$Dye.Colour,1,1) %in% dye.choices),]}
-      
-      dat
+      relevant.data()
     })
     
     ## SET UP CUT OFF SLIDERS BASED ON RUN SELECTION ##
@@ -71,8 +63,49 @@ shinyServer(function(input,output, session){
       
     })
     
-  
+   
+    
+    
+   ## RENDER GRAPH ##
    output$ephgram <- renderPlot({
+     
+     dat <- filedata()
+     
+     if(!is.null(dat)){
+       dat$Dye.Sample.Peak <- substring(dat$Dye.Sample.Peak,1,1)
+       dye.names <- unique(substring(dat$Dye.Sample.Peak,1,1))
+     }
+     dat <- relevant.data()
+    # dat <- dat[as.vector(dat$Sample.Name)==filename(),c("Size","Height","Dye.Sample.Peak")]
+     #dat <- dat[dat$Size>input$scut,]
+    # dat <- dat[dat$Size<551,]
+    # dat <- dat[dat$Height>input$heightcut,]
+     
+     if(!is.null(dat)){
+       
+       #names(dat) <- c("Size","Height","Dye.Colour")
+       #dye.choices <- dye.names[as.numeric(input$dyechoice)]
+       #dat <- dat[which(substring(dat$Dye.Colour,1,1) %in% dye.choices),]
+       plot(1,type='n',xlim=c(0,550),ylim=c(0,max(dat$Height)))
+     
+       for(num in input$dyechoice){
+         points <- dat[which(substring(dat$Dye.Colour,1,1) == dye.names[as.numeric(num)]),]
+         vec <- rep(0,551)
+         vec[round(points$Size)] <- points$Height
+         line.col <- switch(dye.names[as.numeric(num)],
+              "R" = "Red",
+              "B" = "Blue",
+              "G" = "Green",
+              "Y" = "Yellow")
+        lines(c(0:550),vec,col=line.col)
+
+       } #end for
+     } #end if
+     
+   })
+  
+   
+   relevant.data <- reactive({
      dat <- filedata()
      
      if(!is.null(dat)){
@@ -89,29 +122,24 @@ shinyServer(function(input,output, session){
        names(dat) <- c("Size","Height","Dye.Colour")
        dye.choices <- dye.names[as.numeric(input$dyechoice)]
        dat <- dat[which(substring(dat$Dye.Colour,1,1) %in% dye.choices),]
-     
-     
-     
-     plot(1,type='n',xlim=c(0,550),ylim=c(0,max(dat$Height)))
-     
-     for(num in input$dyechoice){
-       points <- dat[which(substring(dat$Dye.Colour,1,1) == dye.names[as.numeric(num)]),]
-       vec <- rep(0,551)
-       vec[round(points$Size)] <- points$Height
-       line.col <- switch(dye.names[as.numeric(num)],
-              "R" = "Red",
-              "B" = "Blue",
-              "G" = "Green",
-              "Y" = "Yellow")
-       lines(c(0:550),vec,col=line.col)
-       #print(vec)
-       #print(num)
-       #print(line.col)
-       #print(dye.names[as.numeric(num)])
      }
-     }
+     
+     dat
    })
+   
+   ## WRITE TO .CSV ON BUTTON PRESS ## 
+  output$filewrite <- renderPrint({
+    dat <- relevant.data()
+    if(input$fwrite > 0){
+      write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE)
+    }else{
+      write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",")
+    }
     
+    return("Printed to peakR-results.csv")
+  })
+     
+     
   
 })
   

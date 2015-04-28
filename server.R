@@ -128,7 +128,7 @@ shinyServer(function(input,output, session){
    })
    
    ## WRITE TO .CSV ON BUTTON PRESS ## 
-  output$filewrite <- renderPrint({
+  observe({
     dat <- relevant.data()
     if(input$fwrite > 0){
       write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE)

@@ -1,4 +1,5 @@
 library(seqinr)
+source("global.R")
 dat <- NULL
 
 
@@ -140,7 +141,13 @@ shinyServer(function(input,output, session){
   observe({
     dat <- relevant.data()
     if(input$fwrite > 0){
-      write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE,row.names=FALSE)
+      
+      temp <- read.csv(file=paste(getwd(),"/peakR-results.csv",sep=""),header=TRUE)
+      temp <- temp$Sample.Name
+      
+      if(!(dat$Sample.Name[1] %in% temp)){
+        write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE,row.names=FALSE)
+      }
     }
     
     return("Printed to peakR-results.csv")

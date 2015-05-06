@@ -20,6 +20,7 @@ process.runs <- function(dat){
   for(current.run in unique.runs){
     ## prune to current run ##
     temp <- dat[as.vector(dat$Sample.Name) == current.run,c("Sample.Name","Size","Height","Dye.Sample.Peak")]
+    temp$Dye.Sample.Peak <- substring(temp$Dye.Sample.Peak,1,1)
     ## any peaks near threshold? ##
     if(any((temp$Height + 300) > sizing.curve(temp$Size) & temp$Height < sizing.curve(temp$Size)) & substring(temp$Dye.Sample.Peak,1,1) != "R" ){
       

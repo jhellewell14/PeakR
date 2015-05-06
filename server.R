@@ -11,6 +11,10 @@ shinyServer(function(input,output, session){
     if(is.null(inFile)) return(NULL)
     out <- read.csv(inFile$datapath, header = TRUE)
     out <- out[!is.na(out$Size),]
+    
+    ## process each run to prune easy reads and send to .csv ##
+    out <- process.runs(out)
+    
     out
     })
     

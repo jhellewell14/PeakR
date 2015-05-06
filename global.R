@@ -1,13 +1,15 @@
 process.runs <- function(dat){
   
-  ## create .csv ##
-  write.table(data.frame("Size"=0,"Height"=0,"Dye.Colour"=0),file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",")
   
   ## get run names ##
   unique.runs <- unique(as.vector(dat$Sample.Name))
   
+  app <- FALSE
+  
   ## indeterminate run vector ##
   ind.runs <- c()
+  ## clean run vector ##
+  clean.runs <- c()
   
   ## cut out plausible peaks by size ##
   ## need to set min size and max size ##
@@ -17,22 +19,26 @@ process.runs <- function(dat){
   ## for each run ##
   for(current.run in unique.runs){
     ## prune to current run ##
-    print("Current run:")
-    print(current.run)
-    temp <- dat[as.vector(dat$Sample.Name) == current.run,c("Size","Height","Dye.Sample.Peak","Sample.Name")]
+    temp <- dat[as.vector(dat$Sample.Name) == current.run,c("Sample.Name","Size","Height","Dye.Sample.Peak")]
     ## any peaks near threshold? ##
-    if(any(temp$Height - 500 > sizing.curve(temp$Size) & temp$Height < sizing.curve(temp$Size))){
+    if(any((temp$Height + 300) > sizing.curve(temp$Size) & temp$Height < sizing.curve(temp$Size)) & substring(temp$Dye.Sample.Peak,1,1) != "R" ){
       
       ind.runs <- c(ind.runs,current.run)
-      print(ind.runs)
+      
     }else{ ## if no trouble, any peaks above threshold? ##
       
       if(any(temp$Height > sizing.curve(temp$Size))){
       
         temp <- temp[temp$Height > sizing.curve(temp$Size),]
-        print(temp)
-        write.table(temp,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE)
-        
+        if(app==FALSE){
+          write.table(temp,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
+          app=TRUE
+        }else{
+          write.table(temp,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE,row.names=FALSE)
+        }
+      
+      }else{
+        clean.runs <- c(clean.runs,current.run)
       }
         
     }
@@ -45,9 +51,9 @@ process.runs <- function(dat){
   }
   
   
+  write.table(data.frame("run name"=clean.runs),file=paste(getwd(),"/peakR-results-clean.csv",sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
   
-  
-  
+  return(ind.runs)
 }
 
 sizing.curve <- function(size){

@@ -13,7 +13,12 @@ shinyServer(function(input,output, session){
     out <- out[!is.na(out$Size),]
     
     ## process each run to prune easy reads and send to .csv ##
-    out <- process.runs(out)
+    ind.files <- process.runs(out)
+    if(is.null(ind.files)){
+      return(NULL)
+    }else{
+      out <- out[which(as.vector(out$Sample.Name) %in% ind.files),]
+    }
     
     out
     })
@@ -117,13 +122,13 @@ shinyServer(function(input,output, session){
        dye.names <- unique(substring(dat$Dye.Sample.Peak,1,1))
      }
      
-     dat <- dat[as.vector(dat$Sample.Name)==filename(),c("Size","Height","Dye.Sample.Peak")]
+     dat <- dat[as.vector(dat$Sample.Name)==filename(),c("Sample.Name","Size","Height","Dye.Sample.Peak")]
      dat <- dat[dat$Size>input$scut,]
      dat <- dat[dat$Size<551,]
      dat <- dat[dat$Height>input$heightcut,]
      
      if(!is.null(dat)){
-       names(dat) <- c("Size","Height","Dye.Colour")
+       names(dat) <- c("Sample.Name","Size","Height","Dye.Colour")
        dye.choices <- dye.names[as.numeric(input$dyechoice)]
        dat <- dat[which(substring(dat$Dye.Colour,1,1) %in% dye.choices),]
      }
@@ -135,9 +140,7 @@ shinyServer(function(input,output, session){
   observe({
     dat <- relevant.data()
     if(input$fwrite > 0){
-      write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE)
-    }else{
-      write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",")
+      write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE,row.names=FALSE)
     }
     
     return("Printed to peakR-results.csv")

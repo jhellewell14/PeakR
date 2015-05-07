@@ -14,11 +14,17 @@ shinyServer(function(input,output, session){
     out <- out[!is.na(out$Size),]
     
     ## process each run to prune easy reads and send to .csv ##
-    ind.files <- process.runs(out)
-    if(is.null(ind.files)){
+    all.files <- process.runs(out)
+    if(is.null(all.files$ind)){
+      output$status <- renderText(paste("Data processed. No indeterminate file(s), ",length(all.files$clean), "clean file(s) and ",
+                                        length(all.files$det), " positive file(s) processed."))
       return(NULL)
+      
     }else{
-      out <- out[which(as.vector(out$Sample.Name) %in% ind.files),]
+      out <- out[which(as.vector(out$Sample.Name) %in% all.files$ind),]
+      output$status <- renderText(paste("Data processed. ", length(all.files$ind),  "indeterminate file(s), ",
+                                        length(all.files$clean), "clean file(s) and ",
+                                        length(all.files$det), " positive file(s) processed."))
     }
     
     out
@@ -56,8 +62,8 @@ shinyServer(function(input,output, session){
     output$hcut <- renderUI({
       dat <- filedata()
       maxval=0
-      if(!is.null(dat)) maxval = max(dat$Height)
-      sliderInput("heightcut","Global min height",min=0,max=maxval,value=0)
+      if(!is.null(dat)) maxval = max(dat$Height[as.vector(dat$Sample.Name)==filename()])
+      sliderInput("heightcut","Global min height",min=1,max=(maxval-1),value=0)
     })
     
     ## SELECT DYES TO SHOW ##
@@ -96,7 +102,7 @@ shinyServer(function(input,output, session){
        #names(dat) <- c("Size","Height","Dye.Colour")
        #dye.choices <- dye.names[as.numeric(input$dyechoice)]
        #dat <- dat[which(substring(dat$Dye.Colour,1,1) %in% dye.choices),]
-       plot(1,type='n',xlim=c(0,550),ylim=c(0,max(dat$Height)))
+       plot(1,type='n',xlim=c(0,550),ylim=c(0,ifelse(is.infinite(max(dat$Height)),30000,max(dat$Height))))
      
        for(num in input$dyechoice){
          points <- dat[which(substring(dat$Dye.Colour,1,1) == dye.names[as.numeric(num)]),]

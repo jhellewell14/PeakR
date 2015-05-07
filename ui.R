@@ -23,7 +23,9 @@ shinyUI(navbarPage("PeakR",
       
       uiOutput("dchoice"),
       
-      actionButton("fwrite",label="Commit")
+      actionButton("fwrite",label="Commit"),
+      
+      textOutput("status")
       
       
     ),

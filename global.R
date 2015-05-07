@@ -10,6 +10,8 @@ process.runs <- function(dat){
   ind.runs <- c()
   ## clean run vector ##
   clean.runs <- c()
+  ## determinate run vector ##
+  det.runs <- c()
   
   ## cut out plausible peaks by size ##
   ## need to set min size and max size ##
@@ -22,7 +24,7 @@ process.runs <- function(dat){
     temp <- dat[as.vector(dat$Sample.Name) == current.run,c("Sample.Name","Size","Height","Dye.Sample.Peak")]
     temp$Dye.Sample.Peak <- substring(temp$Dye.Sample.Peak,1,1)
     ## any peaks near threshold? ##
-    if(any((temp$Height + 300) > sizing.curve(temp$Size) & temp$Height < sizing.curve(temp$Size)) & substring(temp$Dye.Sample.Peak,1,1) != "R" ){
+    if(any((temp$Height + 300) > sizing.curve(temp$Size) & temp$Height < sizing.curve(temp$Size) & substring(temp$Dye.Sample.Peak,1,1) != "R" )){
       
       ind.runs <- c(ind.runs,current.run)
       
@@ -31,11 +33,14 @@ process.runs <- function(dat){
       if(any(temp$Height > sizing.curve(temp$Size))){
       
         temp <- temp[temp$Height > sizing.curve(temp$Size),]
+        temp <- temp[substring(temp$Dye.Sample.Peak,1,1) != "R" & substring(temp$Dye.Sample.Peak,1,1) != "Y" ,]
         if(app==FALSE){
           write.table(temp,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
           app=TRUE
+          det.runs <- c(det.runs,current.run)
         }else{
           write.table(temp,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE,row.names=FALSE)
+          det.runs <- c(det.runs,current.run)
         }
       
       }else{
@@ -54,7 +59,7 @@ process.runs <- function(dat){
   
   write.table(data.frame("run name"=clean.runs),file=paste(getwd(),"/peakR-results-clean.csv",sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
   
-  return(ind.runs)
+  return(list("ind"=ind.runs,"clean"=clean.runs,"det"=det.runs))
 }
 
 sizing.curve <- function(size){

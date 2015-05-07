@@ -150,7 +150,7 @@ shinyServer(function(input,output, session){
       }
     }
     
-    return("Printed to peakR-results.csv")
+    
   })
      
      

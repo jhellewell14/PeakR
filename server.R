@@ -116,6 +116,7 @@ shinyServer(function(input,output, session){
         lines(c(0:550),vec,col=line.col)
 
        } #end for
+       plot(sizing.curve,add=TRUE,col="red",xlim=c(0,550))
      } #end if
      
    })
@@ -153,6 +154,7 @@ shinyServer(function(input,output, session){
       
       if(!(dat$Sample.Name[1] %in% temp)){
         write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE,row.names=FALSE)
+        write.clones("/peakR-results.csv")
       }
     }
     

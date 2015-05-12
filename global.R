@@ -23,8 +23,9 @@ process.runs <- function(dat){
     ## prune to current run ##
     temp <- dat[as.vector(dat$Sample.Name) == current.run,c("Sample.Name","Size","Height","Dye.Sample.Peak")]
     temp$Dye.Sample.Peak <- substring(temp$Dye.Sample.Peak,1,1)
+    temp <- temp[substring(temp$Dye.Sample.Peak,1,1) != "R" & substring(temp$Dye.Sample.Peak,1,1) != "Y" ,]
     ## any peaks near threshold? ##
-    if(any((temp$Height + 300) > sizing.curve(temp$Size) & temp$Height < sizing.curve(temp$Size) & substring(temp$Dye.Sample.Peak,1,1) != "R" )){
+    if(any((temp$Height + 2000) > sizing.curve(temp$Size) & temp$Height < sizing.curve(temp$Size) & substring(temp$Dye.Sample.Peak,1,1) != "R" & substring(temp$Dye.Sample.Peak,1,1) != "Y" )){
       
       ind.runs <- c(ind.runs,current.run)
       
@@ -33,7 +34,6 @@ process.runs <- function(dat){
       if(any(temp$Height > sizing.curve(temp$Size))){
       
         temp <- temp[temp$Height > sizing.curve(temp$Size),]
-        temp <- temp[substring(temp$Dye.Sample.Peak,1,1) != "R" & substring(temp$Dye.Sample.Peak,1,1) != "Y" ,]
         if(app==FALSE){
           write.table(temp,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
           app=TRUE
@@ -90,13 +90,19 @@ write.clones <- function(filename){
   bins.G <- bin.vec(temp$Size[which(substring(temp$Dye.Sample.Peak,1,1)=="G")])
   bins.B <- bin.vec(temp$Size[which(substring(temp$Dye.Sample.Peak,1,1)=="B")])
   temp$Clone.Name <- rep("",length(temp$Size))
+  if(length(bins.G)>0){
   for(ind in 1:length(bins.G)){
     temp$Clone.Name[temp$Size %in% bins.G[[ind]]]  <- names(bins.G)[[ind]]
   }
+  }
+  
+  if(length(bins.B)>0){
   for(ind in 1:length(bins.B)){
     temp$Clone.Name[temp$Size %in% bins.B[[ind]]]  <- names(bins.B)[[ind]]
   }
-  temp$Clone.Name <- paste(ifelse(substring(temp$Dye.Sample.Peak,1,1)=="B","3D7","FC29"),temp$Clone.Name,sep="_")
+  }
+  
+  temp$Clone.Name <- paste(ifelse(substring(temp$Dye.Sample.Peak,1,1)=="B","3D7","FC27"),temp$Clone.Name,sep="_")
   temp$Clone.Name.Nums <- paste(ifelse(substring(temp$Dye.Sample.Peak,1,1)=="B","1","2"),temp$Clone.Name,sep="_")
   write.table(temp,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
 }

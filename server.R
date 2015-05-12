@@ -1,6 +1,12 @@
 library(seqinr)
 source("global.R")
 dat <- NULL
+write.csv(data.frame("Sample.Name"=NA,
+                     "Size"=NA,
+                     "Height"=NA,
+                     "Dye.Sample.Peak"=NA,
+                     "Clone.Name"=NA,
+                     "Clone.Name.Nums"=NA),file=paste(getwd(),"/peakR-results.csv",sep=""),row.names=FALSE)
 
 
 
@@ -147,15 +153,22 @@ shinyServer(function(input,output, session){
    ## WRITE TO .CSV ON BUTTON PRESS ## 
   observe({
     dat <- relevant.data()
-    if(input$fwrite > 0){
+    if(input$fwrite != 0){
       
-      temp <- read.csv(file=paste(getwd(),"/peakR-results.csv",sep=""),header=TRUE)
-      temp <- temp$Sample.Name
-      
-      if(!(dat$Sample.Name[1] %in% temp)){
-        write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE,row.names=FALSE)
-        write.clones("/peakR-results.csv")
-      }
+        
+          
+          temp <- read.csv(file=paste(getwd(),"/peakR-results.csv",sep=""),header=TRUE)
+          temp <- temp[!is.na(temp$Size),]
+          temp <- temp$Sample.Name
+          print(temp)
+          print(dat$Sample.Name[1])
+        
+          if(!(dat$Sample.Name[1] %in% temp)){
+            dat <- dat[dat$Dye.Sample.Peak != "R" & dat$Dye.Sample.Peak != "Y"]
+            write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE,row.names=FALSE)
+            write.clones("/peakR-results.csv")
+          }
+        
     }
     
     

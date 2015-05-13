@@ -1,10 +1,8 @@
 library(seqinr)
 source("global.R")
 dat <- NULL
-#write.table(data.frame("Sample.Name"="test",
-#                       "Size"="0",
-#                       "Height"="0",
-#                       "Dye.Sample.Peak"="test"),file=paste(getwd(),"/peakR-results.csv",sep=""),row.names=FALSE,sep=",")
+
+
 if(file.exists("peakR-results.csv")){
   file.remove("peakR-results.csv")
   
@@ -102,16 +100,10 @@ shinyServer(function(input,output, session){
        dye.names <- unique(substring(dat$Dye.Sample.Peak,1,1))
      }
      dat <- relevant.data()
-    # dat <- dat[as.vector(dat$Sample.Name)==filename(),c("Size","Height","Dye.Sample.Peak")]
-     #dat <- dat[dat$Size>input$scut,]
-    # dat <- dat[dat$Size<551,]
-    # dat <- dat[dat$Height>input$heightcut,]
+
      
      if(!is.null(dat)){
        
-       #names(dat) <- c("Size","Height","Dye.Colour")
-       #dye.choices <- dye.names[as.numeric(input$dyechoice)]
-       #dat <- dat[which(substring(dat$Dye.Colour,1,1) %in% dye.choices),]
        plot(1,type='n',xlim=c(0,550),ylim=c(0,ifelse(is.infinite(max(dat$Height)),30000,max(dat$Height))))
      
        for(num in input$dyechoice){
@@ -156,7 +148,6 @@ shinyServer(function(input,output, session){
    
    ## WRITE TO .CSV ON BUTTON PRESS ## 
   observe({
-    print("pop")
     isolate(dat <- relevant.data())
     if(input$fwrite > 0){
       commit.run(dat)

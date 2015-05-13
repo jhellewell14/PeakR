@@ -55,8 +55,9 @@ process.runs <- function(dat){
   
   write.table(data.frame("run name"=clean.runs),file=paste(getwd(),"/peakR-results-clean.csv",sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
   
+  if(file.exists(paste(getwd(),"/peakR-results.csv",sep=""))){
   write.clones("/peakR-results.csv")
-  
+  }
   return(list("ind"=ind.runs,"clean"=clean.runs,"det"=det.runs))
 }
 
@@ -86,7 +87,7 @@ bin.vec <- function(vec){
 }
 
 write.clones <- function(filename){
-  temp <- read.csv(file=paste(getwd(),filename,sep=""))
+  temp <- read.table(file=paste(getwd(),filename,sep=""),sep=",",header=TRUE)
   bins.G <- bin.vec(temp$Size[which(substring(temp$Dye.Sample.Peak,1,1)=="G")])
   bins.B <- bin.vec(temp$Size[which(substring(temp$Dye.Sample.Peak,1,1)=="B")])
   temp$Clone.Name <- rep("",length(temp$Size))
@@ -104,8 +105,30 @@ write.clones <- function(filename){
   
   temp$Clone.Name <- paste(ifelse(substring(temp$Dye.Sample.Peak,1,1)=="B","3D7","FC27"),temp$Clone.Name,sep="_")
   temp$Clone.Name.Nums <- paste(ifelse(substring(temp$Dye.Sample.Peak,1,1)=="B","1","2"),temp$Clone.Name,sep="_")
+  file.remove("peakR-results.csv")
   write.table(temp,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
 }
 
+
+commit.run <- function(dat){
+  if(file.exists(paste(getwd(),"/peakR-results.csv",sep=""))){
+  
+    temp <- read.table(file=paste(getwd(),"/peakR-results.csv",sep=""),header=TRUE,sep=",")
+    temp <- temp[!is.na(temp$Size),]
+    temp <- as.vector(temp$Sample.Name)
+
+    dat$Clone.Name <- rep(NA,length(dat$Size))
+    dat$Clone.Name.Num <- rep(NA,length(dat$Size))
+    
+    if((as.vector(dat$Sample.Name[1]) %in% temp) == FALSE){
+      dat <- dat[dat$Dye.Sample.Peak != "R" & dat$Dye.Sample.Peak != "Y",]
+      write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE,row.names=FALSE)
+    }
+    
+  }else{
+    dat <- dat[dat$Dye.Sample.Peak != "R" & dat$Dye.Sample.Peak != "Y",]
+    write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
+  }
+}
 
 

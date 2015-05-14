@@ -62,7 +62,8 @@ process.runs <- function(dat){
 }
 
 sizing.curve <- function(size){
-  return((28*size) + 7000)
+  #return((28*size) + 7000)
+  return(4000+(0*size))
 }
 
 
@@ -81,7 +82,7 @@ bin.vec <- function(vec){
     
   }
   
-  names(bin.list) <- lapply(bin.list,function(x){round(mean(x),2)})
+  names(bin.list) <- lapply(bin.list,function(x){round(mean(x),0)})
   
   return(bin.list)
 }
@@ -105,8 +106,7 @@ write.clones <- function(filename){
   
   temp$Clone.Name <- paste(ifelse(substring(temp$Dye.Sample.Peak,1,1)=="B","3D7","FC27"),temp$Clone.Name,sep="_")
   temp$Clone.Name.Nums <- paste(ifelse(substring(temp$Dye.Sample.Peak,1,1)=="B","1","2"),temp$Clone.Name,sep="_")
-  file.remove("peakR-results.csv")
-  write.table(temp,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
+  write.table(temp,file=paste(getwd(),filename,sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
 }
 
 

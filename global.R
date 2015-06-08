@@ -63,7 +63,7 @@ process.runs <- function(dat){
 
 sizing.curve <- function(size){
   #return((28*size) + 7000)
-  return(4000+(0*size))
+  return(3000+(0*size))
 }
 
 

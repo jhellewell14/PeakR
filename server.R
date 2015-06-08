@@ -1,4 +1,4 @@
-library(seqinr)
+
 source("global.R")
 dat <- NULL
 

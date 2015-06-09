@@ -62,7 +62,6 @@ process.runs <- function(dat){
 }
 
 sizing.curve <- function(size){
-  #return((28*size) + 7000)
   return(3000+(0*size))
 }
 
@@ -110,25 +109,56 @@ write.clones <- function(filename){
 }
 
 
-commit.run <- function(dat){
+commit.run <- function(dat,samp){
   if(file.exists(paste(getwd(),"/peakR-results.csv",sep=""))){
+    
+    if(nrow(dat)==0){
+      if(file.exists(paste(getwd(),"/peakR-results-clean.csv",sep=""))){
+        write.table(data.frame("run.name"=samp),
+                    file=paste(getwd(),"/peakR-results-clean.csv",sep=""),
+                    append=TRUE,sep=",",col.names=FALSE,row.names=FALSE)
+      }else{
+        write.table(data.frame("run.name"=samp),
+                    file=paste(getwd(),"/peakR-results-clean.csv",sep=""),
+                    append=FALSE,sep=",",col.names=FALSE,row.names=FALSE)
+      }
+    }else{
   
     temp <- read.table(file=paste(getwd(),"/peakR-results.csv",sep=""),header=TRUE,sep=",")
     temp <- temp[!is.na(temp$Size),]
-    temp <- as.vector(temp$Sample.Name)
+    temp1 <- as.vector(temp$Sample.Name)
 
     dat$Clone.Name <- rep(NA,length(dat$Size))
     dat$Clone.Name.Num <- rep(NA,length(dat$Size))
     
-    if((as.vector(dat$Sample.Name[1]) %in% temp) == FALSE){
+    if((as.vector(dat$Sample.Name[1]) %in% temp1) == FALSE){
+      dat <- dat[dat$Dye.Sample.Peak != "R" & dat$Dye.Sample.Peak != "Y",]
+      write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE,row.names=FALSE)
+    }else{
+      temp <- temp[!(as.vector(temp$Sample.Name) == dat$Sample.Name[1]),]
+      write.table(temp,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
       dat <- dat[dat$Dye.Sample.Peak != "R" & dat$Dye.Sample.Peak != "Y",]
       write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=TRUE,col.names=FALSE,row.names=FALSE)
     }
-    
+    }
   }else{
+    
+    if(nrow(dat)==0){
+      if(file.exists(paste(getwd(),"/peakR-results-clean.csv",sep=""))){
+        write.table(data.frame("run.name"=samp),
+                    file=paste(getwd(),"/peakR-results-clean.csv",sep=""),
+                    append=TRUE,sep=",",col.names=FALSE,row.names=FALSE)
+      }else{
+        write.table(data.frame("run.name"=samp),
+                    file=paste(getwd(),"/peakR-results-clean.csv",sep=""),
+                    append=FALSE,sep=",",col.names=FALSE,row.names=FALSE)
+      }
+    }else{
     dat <- dat[dat$Dye.Sample.Peak != "R" & dat$Dye.Sample.Peak != "Y",]
     write.table(dat,file=paste(getwd(),"/peakR-results.csv",sep=""),sep=",",append=FALSE,col.names=TRUE,row.names=FALSE)
-  }
+    }
+    }
+  
 }
 
 

@@ -150,7 +150,7 @@ shinyServer(function(input,output, session){
   observe({
     isolate(dat <- relevant.data())
     if(input$fwrite > 0){
-      commit.run(dat)
+      commit.run(dat,input$run)
       write.clones("/peakR-results.csv")
     } 
   })

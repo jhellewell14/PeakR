@@ -62,26 +62,22 @@ process.runs <- function(dat){
 }
 
 sizing.curve <- function(size){
-  return(3000+(0*size))
+  return(1500+(0*size))
 }
 
 
 bin.vec <- function(vec){
   
-  num.bins <- 1
+  fit <- pamk(data=vec,krange=2:50,usepam=FALSE)
+  
+  num.bins <- fit$nc
   bin.list <- list()
-
-  while(length(vec>0)){
-    
-    cs <- vec[1]
-    relev <- which(abs(cs-vec)<3)
-    bin.list[[num.bins]] <- vec[relev]
-    vec <- vec[-relev]
-    num.bins <- num.bins + 1
-    
+  
+  for(i in 1:num.bins){
+    bin.list[[i]] <- vec[which(fit$pamobject$clustering==i)]
   }
   
-  names(bin.list) <- lapply(bin.list,function(x){round(mean(x),0)})
+  names(bin.list) <- round(fit$pamobject$medoids,0)
   
   return(bin.list)
 }
